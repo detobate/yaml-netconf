@@ -1,0 +1,6 @@
+---
+- name: "Building SROS config"
+  template: src=templates/7750SR-filter.j2 dest=compiled/{{ inventory_hostname }}_SROS.cfg
+
+- name: "Building NETCONF XML"
+  template: src=templates/NETCONF-XML-filter.j2 dest=compiled/{{ inventory_hostname }}_NETCONF.xml

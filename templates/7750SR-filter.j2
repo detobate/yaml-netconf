@@ -1,0 +1,51 @@
+/configure filter ip-filter
+default-action forward
+description "{{ ACL['description'] }}"
+{% set count = [1] %}
+{% for rule in ACL['rules'] %}
+{% for source in rule['source'] %}
+{% for dest in rule['dest'] %}
+entry {{ count[0] }} create
+{% if count.append(count.pop() + 1) %}{% endif %} {# increment count by 1 #}
+description "{{ rule['description'] }}"
+{% if rule['proto'] != "any" %}
+  match protocol "{{ rule['proto'] }}"
+{% else %}
+  match
+{% endif %}
+{% if rule['source'] is not string %}
+    src-ip {{ source }}
+{% elif rule['source'] != "any" %}
+    src-ip {{ rule['source'] }}
+{% endif %}
+{% if rule['dest'] is not string %}
+    dst-ip {{ dest }}
+{% elif rule['dest'] != "any" %}
+    dst-ip {{ rule['dest'] }}
+{% endif %}
+{% if rule['sport'] != "any" %}
+{% set sportrange = rule['sport'].split(" ") %}
+{% if sportrange[1] is defined %}
+    src-port range {{ sportrange[0] }} {{ sportrange[1] }}
+{% elif rule['sport'] != "any" %}
+    src-port eq {{ rule['sport'] }}
+{% endif %}
+{% endif %}
+{% if rule['dport'] != "any" %}
+{% set dportrange = rule['dport'].split(" ") %}
+{% if dportrange[1] is defined %}
+    dst-port range {{ dportrange[0] }} {{ dportrange[1] }}
+{% elif rule['dport'] != "any" %}
+    dst-port eq {{ rule['dport'] }}
+{% endif %}
+{% endif %}
+    exit
+{% if rule['actions'] == "permit" %}
+  action forward
+{% elif rule['actions'] == "deny" %}
+  action drop
+{% endif %}
+exit
+{% endfor %}
+{% endfor %}
+{% endfor %}

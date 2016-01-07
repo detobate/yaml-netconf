@@ -1,0 +1,138 @@
+<?xml version='1.0' encoding='UTF-8'?>
+  <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <access-lists xmlns="urn:ietf:params:xml:ns:yang:ietf-access-control-list">
+      <acl>
+        <acl-oper-data />
+        <access-list-entries>
+{% set count = [1] %}
+{% for rule in ACL['rules'] %}
+{% for source in rule['source'] %}
+{% for dest in rule['dest'] %}
+          <ace>
+            <matches>
+{# DESTINATION ADDRESS MATCHING BEGINS #}
+{% if ACL['acl_type'] == "ipv4-acl" and rule['dest'] is not none and rule['dest'] != "any" %}
+              <destination-ipv4-network>
+{% if rule['dest'] is not string %}
+                  {{ dest }}
+{% else %}
+                  {{ rule['dest'] }}
+{% endif %}
+              </destination-ipv4-network>
+              <destination-ipv6-network />
+{% elif ACL['acl_type'] == "ipv6-acl" and rule['dest'] is not none and rule['dest'] != "any" %}
+              <destination-ipv4-network />
+              <destination-ipv6-network>
+{% if rule['dest'] is not string %}
+                {{ dest }}
+{% else %}
+                {{ rule['dest'] }}
+{% endif %}
+              </destination-ipv6-network>
+{% elif rule['source'] is none or rule['dest'] == "any" %}
+              <destination-ipv4-network />
+              <destination-ipv6-network />
+{% endif %}
+{# SOURCE ADDRESS MATCHING BEGINS #}
+{% if ACL['acl_type'] == "ipv4-acl" and rule['source'] is not none and rule['source'] != "any" %}
+              <source-ipv4-network>
+{% if rule['source'] is not string %}
+                  {{ source }}
+{% else %}
+                  {{ rule['source'] }}
+{% endif %}
+              </source-ipv4-network>
+              <source-ipv6-network />
+{% elif ACL['acl_type'] == "ipv6-acl" and rule['source'] is not none and rule['source'] != "any" %}
+              <source-ipv4-network />
+              <source-ipv6-network>
+{% if rule['source'] is not string %}
+                {{ source }}
+{% else %}
+                {{ rule['source'] }}
+{% endif %}
+              </source-ipv6-network>
+{% elif rule['source'] is none or rule['source'] == "any" %}
+              <source-ipv4-network />
+              <source-ipv6-network />
+{% endif %}
+              <flow-label />
+              <dscp />
+{% if rule['proto'] is not none and rule['proto'] != "any" %}
+              <protocol>
+                {{ rule['proto'] }}
+              </protocol>
+{% else %}
+              <protocol />
+{% endif %}
+{# SOURCE PORT MATCHING BEGINS #}
+              <source-port-range>
+{% if rule['sport'] is not none and rule['sport'] != "any"  %}
+{% set sportrange = rule['sport'].split(" ") %}
+{% if sportrange[1] is defined %}
+                <lower-port>
+                  {{ sportrange[0] }}
+                </lower-port>
+                <upper-port>
+                  {{ sportrange[1] }}
+                </upper-port>
+{% else %}
+                <lower-port>
+                  {{ rule['sport'] }}
+                </lower-port>
+                <upper-port />
+{% endif %}
+{% elif rule['sport'] is none or rule['sport'] == "any"  %}
+                <lower-port />
+                <upper-port />
+{% endif %}
+              </source-port-range>
+{# DESTINATION PORT MATCHING BEGINS #}
+              <destination-port-range>
+{% if rule['dport'] is not none and rule['dport'] != "any"  %}
+{% set dportrange = rule['dport'].split(" ") %}
+{% if dportrange[1] is defined %}
+                <lower-port>
+                  {{ dportrange[0] }}
+                </lower-port>
+                <upper-port>
+                  {{ dportrange[1] }}
+                </upper-port>
+{% else %}
+                <lower-port>
+                  {{ rule['dport'] }}
+                </lower-port>
+                <upper-port />
+{% endif %}
+{% elif rule['dport'] is none or rule['dport'] == "any"  %}
+                <lower-port />
+                <upper-port />
+{% endif %}
+              </destination-port-range>
+{# ETHERNET / LAYER2 MATCHING BEGINS #}
+{% if ACL['acl_type'] != "eth-acl" %}
+              <destination-mac-address />
+              <destination-mac-address-mask />
+              <source-mac-address />
+              <source-mac-address-mask />
+              <input-interface />
+{% endif %}
+            </matches>
+            <actions>
+              <{{ rule['actions'] }} />
+            </actions>
+            <ace-oper-data>
+              <match-counter />
+            </ace-oper-data>
+            <rule-name>rule{{ count[0] }}</rule-name>
+          </ace>
+{% if count.append(count.pop() + 1) %}{% endif %} {# increment count by 1 #}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+        </access-list-entries>
+        <acl-name></acl-name>
+       <acl-type>{{ ACL['acl_type'] }}</acl-type>
+     </acl>
+   </access-lists>
+</data>
