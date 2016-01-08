@@ -1,0 +1,65 @@
+# IPv4 NETWORKS ONLY and common IPv4 IPv6 PROTOCOL & PORT OBJECT_GROUPS.ACL
+
+
+# RFC ranges - used in Bogon blocking
+$net_rfc3330 = [ qw( 0.0.0.0 127.0.0.0/8 169.254.0.0/16 192.0.2.0/24 224.0.0.0/3 ) ]
+$net_rfc1918 = [ qw( 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 ) ]
+#
+# Additional RFC ranges used in Bogon blocking. 
+#
+# Limited Broadcast
+$net_rfc922 = '255.255.255.255/32'
+
+# Reserved For Future Use
+$net_rfc1112 = '240.0.0.0/4'
+
+# "This" Network, Loopback
+$net_rfc1122 = [ qw( 0.0.0.0/8 127.0.0.0/8 ) ]
+
+# Network Interconnect Device Benchmark Testing
+$net_rfc2544 = '198.18.0.0/15'
+
+# Multicast
+$net_rfc3171 = '224.0.0.0/4'
+
+# Link Local
+$net_rfc3927 = '169.254.0.0/16'
+
+# IETF Protocol Assignments
+$net_rfc5736 = '192.0.0.0/24'
+
+# TEST-NET-1, TEST-NET-2, TEST-NET-3
+$net_rfc5737 = [ qw( 192.0.2.0/24 198.51.100.0/24 203.0.113.0/24 ) ] 
+
+# IANA-Reserved Shared Address Space
+$net_rfc6598 = '100.64.0.0/10'
+#VRRP for Thunder Voice
+$net_thunder_voice = [ qw( 10.12.128.0/20 10.12.144.0/20 ) ]
+#
+#
+# CYMRU BOGON LIST http://www.team-cymru.org/Services/Bogons/bogon-bn-nonagg.txt
+$net_bogon_cymru = [ $net_rfc1112, $net_rfc1122, $net_rfc2544, $net_rfc3171, $net_rfc3927, $net_rfc5736, $net_rfc5737, $net_rfc6598 ]
+#
+
+
+# RFC3068 6to4 Relay Anycast. May appear in GRT. NOT a BOGON. 
+$net_rfc3068 = '192.88.99.0/24'
+
+
+# RFC5735 (obsoletes RFC3330)
+#
+$net_rfc5735 = [ $net_rfc922, $net_rfc3068, $net_bogon_cymru ]
+#
+#
+
+
+$net_broadcast_0 = '0.0.0.0/32'
+$net_broadcast_255 = '255.255.255.255/32'
+
+
+# ALL IPv4 NET, "ANY"
+# 
+# ONLY FOR CASES: "permit|deny ip any any"
+# 
+$net_any = [ qw( 0.0.0.0/1 128.0.0.0/1 ) ]
+
