@@ -23,21 +23,15 @@ description "{{ rule['description'] }}"
 {% elif rule['dest'] != "any" %}
     dst-ip {{ rule['dest'] }}
 {% endif %}
-{% if rule['sport'] != "any" %}
-{% set sportrange = rule['sport'].split(" ") %}
-{% if sportrange[1] is defined %}
-    src-port range {{ sportrange[0] }} {{ sportrange[1] }}
+{% if rule['sport']['startrange'] is defined and rule['sport']['endrange'] is defined %}
+    src-port range {{ rule['sport']['startrange'] }} {{ rule['sport']['endrange'] }}
 {% elif rule['sport'] != "any" %}
     src-port eq {{ rule['sport'] }}
 {% endif %}
-{% endif %}
-{% if rule['dport'] != "any" %}
-{% set dportrange = rule['dport'].split(" ") %}
-{% if dportrange[1] is defined %}
-    dst-port range {{ dportrange[0] }} {{ dportrange[1] }}
+{% if rule['dport']['startrange'] is defined and rule['dport']['endrange'] is defined %}
+    dst-port range {{ rule['dport']['startrange'] }} {{ rule['dport']['endrange'] }}
 {% elif rule['dport'] != "any" %}
     dst-port eq {{ rule['dport'] }}
-{% endif %}
 {% endif %}
     exit
 {% if rule['actions'] == "permit" %}

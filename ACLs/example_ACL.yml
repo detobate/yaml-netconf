@@ -3,8 +3,7 @@ ACL:
   acl_name: "SAP-Subscriber-Ingress"
   description: "SAP Ingress IPv4 ACL"
   rules:
-    - 1:
-      description: "Test multiple sources"
+    - description: "Test multiple sources"
       source: "{{ distbng['ipv4'] }}"
       dest: "any"
       proto: "{{ service_ssh['proto']}}"
@@ -12,8 +11,7 @@ ACL:
       dport: "{{ service_ssh['dport']}}"
       actions: "deny"
 
-    - 2:
-      description: "Test different actions"
+    - description: "Test different actions"
       source: "{{ distbng['ipv4'] }}"
       dest: "any"
       proto: "any"
@@ -21,8 +19,7 @@ ACL:
       dport: "any"
       actions: "permit"
 
-    - 3:
-      description: "test protocol matching with multiple sources"
+    - description: "test protocol matching with multiple sources"
       source: "any"
       dest: "{{ distbng['ipv4'] }}"
       proto: "icmp"
@@ -30,20 +27,28 @@ ACL:
       dport: "any"
       actions: "deny"
 
-    - 4:
-      description: "test port range matching"
+    - description: "test port range matching"
       source: "any"
       dest: "{{ distbng['ipv4'] }}"
       proto: "any"
       sport: "any"
-      dport: "1024 65535"
+      dport:
+          startrange: "1024"
+          endrange: "65535"
       actions: "deny"
 
-    - 5:
-      description: "test hostgroups w/ multi source and multi dest"
-      source: "{{ distbng['ipv4'] }}"
-      dest: "{{ cdns['hosts'] }}"
+    - description: "test hostgroups w/ multi source and multi dest"
+      source: "{{ distbng.ipv4 }}"          ## Testing dot notation
+      dest: "{{ cdns.hosts }}"              ## Testing dot notation
       proto: "{{ service_dns['proto'] }}"
       sport: "{{ service_dns['sport'] }}"
       dport: "{{ service_dns['dport'] }}"
+      actions: "permit"
+
+    - description: "test variable port range"
+      source: "{{ distbng['ipv4'] }}"
+      dest: "any"
+      proto: "{{ service_testportrange['proto'] }}"
+      sport: "{{ service_testportrange['sport'] }}"
+      dport: "{{ service_testportrange['dport'] }}"
       actions: "permit"

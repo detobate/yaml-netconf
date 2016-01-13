@@ -14,9 +14,11 @@ else:
     try:
         outfile = open(sys.argv[2], 'w')
     except:
-        print("Couldn't open output file for writing")
-        # Not writing to file just yet.  Just printing to stdout
+        #print("Couldn't open output file for writing")
+        ## Not writing to file just yet.  Just printing to stdout
         pass
+
+badchars = tuple(["'","\"","}","]",")","{","[","(",","])
 
 def strip(x):
     unwanted = {'[', ']', '(', ')', 'qw', 'qw(', '[(', ')]', '),', ',', '\'', ' '}
@@ -60,7 +62,9 @@ def output(entry):
     print("%s:" % var),      # Print without newlines
     # Catch port ranges
     if isinstance(entry, list) and len(entry) == 2 and all(isinstance(x, int) for x in entry):
-        print("\"%s %s\"" % (entry[0], entry[1]))
+        #print("\n"),
+        print("\n\tstartrange: \"%s\"" % entry[0])
+        print("\tendrange: \"%s\"" % entry[1])
     elif isinstance(entry, list) and len(entry) > 1:
         print("\n"),
         for value in entry:
@@ -75,6 +79,7 @@ def output(entry):
         print("\"%s\"" % entry)
 
 def main():
+    print("---")
     for line in infile:
         # Skip comments and newlines
         if re.match("^#", line) or line == "\n":
@@ -96,10 +101,10 @@ def main():
             idx = entry.index(item)         # find index before we mangle the value
             if isinstance(item, int):
                 continue                    # We don't need to parse integers
-            if item.endswith(tuple(["'","\"","}","]",")",","])):
+            if item.endswith(badchars):
                 #print("Removing %s from %s" % (entry[idx][-1],entry[idx]))
                 entry[idx] = entry[idx][:-1]
-            if item.startswith(tuple(["'","\"","{","[","(",","])):
+            if item.startswith(badchars):
                 #print("Removing %s from %s" % (entry[idx][0],entry[idx]))
                 entry[idx] = entry[idx][1:]
 
@@ -124,11 +129,12 @@ def main():
                     entry[idx] = entry[idx][1:] # strip leading $ and add curlies
                     entry[idx] = "{{ %s }}" % entry[idx]
 
-        # If line contains more than just "variable = value", remove unwanted things
+        # If line contains more than just "variable = value", remove unwanted entries
         if len(entry) > 3:
             entry[:] = [x for x in entry if not strip(x)]
 
         output(entry)
+    print("...")
 
 if __name__ == "__main__":
     main()
