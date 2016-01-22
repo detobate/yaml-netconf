@@ -18,8 +18,10 @@ else:
         ## Not writing to file just yet.  Just printing to stdout
         pass
 
-badchars = tuple(["'","\"","}","]",")","{","[","(",","])
+# Chars to strip from either end of an element
+stripchars = '[](),\'\ \"'
 
+# Used to strip whole elements from a list.
 def strip(x):
     unwanted = {'[', ']', '(', ')', 'qw', 'qw(', '[(', ')]', '),', ',', '\'', ' '}
     if x in unwanted:
@@ -101,12 +103,8 @@ def main():
             idx = entry.index(item)         # find index before we mangle the value
             if isinstance(item, int):
                 continue                    # We don't need to parse integers
-            if item.endswith(badchars):
-                #print("Removing %s from %s" % (entry[idx][-1],entry[idx]))
-                entry[idx] = entry[idx][:-1]
-            if item.startswith(badchars):
-                #print("Removing %s from %s" % (entry[idx][0],entry[idx]))
-                entry[idx] = entry[idx][1:]
+
+            entry[idx] = item.strip(stripchars)
 
             newItem = splitPortRange(entry[idx])
             if isinstance(newItem, str):
@@ -127,7 +125,7 @@ def main():
                 idx = entry.index(item)
                 if entry[idx][:1] == "$":
                     entry[idx] = entry[idx][1:] # strip leading $ and add curlies
-                    entry[idx] = "{{ %s }}" % entry[idx]
+                    entry[idx] = "{{ %s }}" % entry[idx].strip(stripchars)
 
         # If line contains more than just "variable = value", remove unwanted entries
         if len(entry) > 3:
