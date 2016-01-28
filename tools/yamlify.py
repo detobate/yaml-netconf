@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
 import re
 
@@ -8,7 +8,7 @@ if len(sys.argv) != 2:
 else:
     try:
         infile = open(sys.argv[1], 'r')
-    except NameError, IOError:
+    except(NameError, IOError):
         print("Couldn't find %s" % infile)
         raise
     try:
@@ -61,16 +61,15 @@ def output(entry):
         print("WARNING: %s is empty" % var)
         return
 
-    print("%s:" % var),      # Print without newlines
+    print("%s: " % var, end='')      # Print without newlines
     # Catch port ranges
     if isinstance(entry, list) and len(entry) == 2 and all(isinstance(x, int) for x in entry):
-        #print("\n"),
-        print("\n\tstartrange: \"%s\"" % entry[0])
-        print("\tendrange: \"%s\"" % entry[1])
+        print("\n  startrange: \"%s\"" % entry[0])
+        print("  endrange: \"%s\"" % entry[1])
     elif isinstance(entry, list) and len(entry) > 1:
-        print("\n"),
+        print()
         for value in entry:
-            print("\t- \"%s\"" % value)
+            print("  - \"%s\"" % value)
     elif isinstance(entry, list):
         try:
             print("\"%s\"" % entry[0])
