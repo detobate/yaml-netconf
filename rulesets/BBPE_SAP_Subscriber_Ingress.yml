@@ -1,0 +1,7 @@
+acl_type: ipv4-acl
+description: "BNG Subscriber Ingress"
+owner: "NetDev - IP Services"
+target_hosts: "BBPEs"
+name: "SAP_Subscriber_Ingress"
+services:
+    - "{{ svc_block_v4_bogons }}"
