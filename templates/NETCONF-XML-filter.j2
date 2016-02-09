@@ -6,53 +6,47 @@
         <access-list-entries>
 {% set count = [1] %}
 {% for rule in ACL['rules'] %}
-{% for source in rule['source'] %}
-{% for dest in rule['dest'] %}
+{% if rule['source'] is string %}
+    {%- set sources = [rule['source']] -%}
+{% else %}
+    {%- set sources = rule['source'] -%}
+{% endif %}
+{% for source in sources %}
+{% if rule['dest'] is string %}
+    {%- set destinations = [rule['dest']] -%}
+{% else %}
+    {%- set destinations = rule['dest'] -%}
+{% endif %}
+{% for dest in destinations %}
           <ace>
             <matches>
 {# DESTINATION ADDRESS MATCHING BEGINS #}
 {% if ACL['acl_type'] == "ipv4-acl" and dest != "any" %}
               <destination-ipv4-network>
-{% if rule['dest'] is not string %}
                   {{ dest }}
-{% else %}
-                  {{ rule['dest'] }}
-{% endif %}
               </destination-ipv4-network>
               <destination-ipv6-network />
 {% elif ACL['acl_type'] == "ipv6-acl" and dest != "any" %}
               <destination-ipv4-network />
               <destination-ipv6-network>
-{% if rule['dest'] is not string %}
                 {{ dest }}
-{% else %}
-                {{ rule['dest'] }}
-{% endif %}
               </destination-ipv6-network>
-{% elif rule['source'] is none or rule['dest'] == "any" %}
+{% elif source is none or dest == "any" %}
               <destination-ipv4-network />
               <destination-ipv6-network />
 {% endif %}
 {# SOURCE ADDRESS MATCHING BEGINS #}
-{% if ACL['acl_type'] == "ipv4-acl" and rule['source'] is not none and rule['source'] != "any" %}
+{% if ACL['acl_type'] == "ipv4-acl" and source is not none and source != "any" %}
               <source-ipv4-network>
-{% if rule['source'] is not string %}
                   {{ source }}
-{% else %}
-                  {{ rule['source'] }}
-{% endif %}
               </source-ipv4-network>
               <source-ipv6-network />
-{% elif ACL['acl_type'] == "ipv6-acl" and rule['source'] is not none and rule['source'] != "any" %}
+{% elif ACL['acl_type'] == "ipv6-acl" and source is not none and source != "any" %}
               <source-ipv4-network />
               <source-ipv6-network>
-{% if rule['source'] is not string %}
                 {{ source }}
-{% else %}
-                {{ rule['source'] }}
-{% endif %}
               </source-ipv6-network>
-{% elif rule['source'] is none or rule['source'] == "any" %}
+{% elif source is none or source == "any" %}
               <source-ipv4-network />
               <source-ipv6-network />
 {% endif %}

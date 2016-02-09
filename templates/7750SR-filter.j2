@@ -3,25 +3,31 @@ default-action forward
 description "{{ ACL['description'] }}"
 {% set count = [1] %}
 {% for rule in ACL['rules'] %}
-{% for source in rule['source'] %}
-{% for dest in rule['dest'] %}
+{% if rule['source'] is string %}
+    {%- set sources = [rule['source']] -%}
+{% else %}
+    {%- set sources = rule['source'] -%}
+{% endif %}
+{% for source in sources %}
+{% if rule['dest'] is string %}
+    {%- set destinations = [rule['dest']] -%}
+{% else %}
+    {%- set destinations = rule['dest'] -%}
+{% endif %}
+{% for dest in destinations %}
 entry {{ count[0] }} create
 {% if count.append(count.pop() + 1) %}{% endif %} {# increment count by 1 #}
-description "{{ rule['description'] }}"
+ description "{{ rule['description'] }}"
 {% if rule['proto'] != "any" %}
   match protocol "{{ rule['proto'] }}"
 {% else %}
   match
 {% endif %}
-{% if rule['source'] is not string %}
+{% if source != "any" %}
     src-ip {{ source }}
-{% elif rule['source'] != "any" %}
-    src-ip {{ rule['source'] }}
 {% endif %}
-{% if rule['dest'] is not string %}
+{% if dest != "any" %}
     dst-ip {{ dest }}
-{% elif rule['dest'] != "any" %}
-    dst-ip {{ rule['dest'] }}
 {% endif %}
 {% if rule['sport']['startrange'] is defined and rule['sport']['endrange'] is defined %}
     src-port range {{ rule['sport']['startrange'] }} {{ rule['sport']['endrange'] }}
