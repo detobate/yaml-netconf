@@ -3,13 +3,6 @@ import sys
 import yaml
 
 
-header = '''---
-acl_type: "ipv4-acl" OR "ipv6-acl"
-target_acl: "<FILL_ME>"
-description: "<FILL_ME"
-owner: "<FILL_ME>"
-rules:'''
-
 if len(sys.argv) < 2:
     print("Syntax: %s <infile> [objectfiles]" % sys.argv[0])
     exit(1)
@@ -31,43 +24,46 @@ def fetchObjects(objectFiles):
     return list(objects)
 
 
-def output(rule):
+def parseRule(rule):
+    newRule = {}
     try:
-        print('  - description: %s' % rule['description'])
+        newRule['description'] = rule['description']
     except:
-        print('  - description: "NO DESCRIPTION PROVIDED"')
+        newRule['description'] = "NO DESCRIPTION PROVIDED"
     try:
-        print('    source: "%s"' % rule['source'])
+        newRule['source'] = rule['source']
     except:
-        print('    source: "any"')
+        newRule['source'] = "any"
     try:
-        print('    dest: "%s"' % rule['dest'])
+        newRule['dest'] = rule['dest']
     except:
-        print('    dest: "any"')
+        newRule['dest'] = "any"
     try:
         if isinstance(rule['sport'], str):
-            print('    sport: "%s"' % rule['sport'])
+            newRule['sport'] = rule['sport']
         elif isinstance(rule['sport'], list):
-            print('    sport:')
-            print('    startrange: "%s"' % rule['sport'][0])
-            print('    endrange: "%s"' % rule['sport'][1])
+            newRule['sport'] = {}
+            newRule['sport']['startrange'] = rule['sport'][0]
+            newRule['sport']['endrange'] = rule['sport'][1]
     except:
-        print('    sport: "any"')
+        newRule['sport'] = "any"
     try:
         if isinstance(rule['dport'], str):
-            print('    dport: "%s"' % rule['dport'])
+            newRule['dport'] = rule['dport']
         elif isinstance(rule['dport'], list):
-            print('    dport:')
-            print('    startrange: "%s"' % rule['dport'][0])
-            print('    endrange: "%s"' % rule['dport'][1])
+            newRule['dport'] = {}
+            newRule['dport']['startrange'] = rule['dport'][0]
+            newRule['dport']['endrange'] =rule['dport'][1]
     except:
-        print('    dport: "any"')
+        newRule['dport'] = "any"
 
     try:
-        print('    actions: "%s"' % rule['actions'])
+        newRule['actions'] = rule['actions']
     except:
         print("ERROR: Rule missing action")
         exit(1)
+
+    return newRule
 
 def fetchRules(infile):
     ruleset = []    # Use an ordered list for rules
@@ -136,7 +132,12 @@ def findVar(search, objects):
 
 def main():
 
-    print(header)
+    yamlFile = {}
+    yamlFile['acl_type'] = '"ipv4-acl" OR "ipv6-acl"'
+    yamlFile['description'] = '<FILL_ME>'
+    yamlFile['owner'] = '<FILL_ME>'
+    yamlFile['rules'] = []
+
     ruleset = fetchRules(infile)
     objects = fetchObjects(objectFiles)
 
@@ -148,10 +149,10 @@ def main():
                 #print("Replacing %s with {{ %s }}" % (value, varname))
                 rule[key] = "{{ %s }}" % varname
 
-        #print(rule)
-        output(rule)
-        print()
+        yamlFile['rules'].append(parseRule(rule))   # Add the parsed rule dict to the YAML file as a new list item
 
+    print(yaml.dump(yamlFile, explicit_start=True, default_flow_style=False))
+    #print(yamlFile)
     print('...')
 
     infile.close()
