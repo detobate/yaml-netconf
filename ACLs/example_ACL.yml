@@ -1,54 +1,56 @@
+---
 ACL:
   acl_type: ipv4-acl
-  acl_name: "SAP-Subscriber-Ingress"
-  description: "SAP Ingress IPv4 ACL"
+  description: DISTBNG Subscriber Ingress
+  name: SAP_Subscriber_Ingress
   rules:
-    - description: "Test multiple sources"
-      source: "{{ distbng['ipv4'] }}"
-      dest: "any"
-      proto: "{{ service_ssh['proto']}}"
-      sport: "{{ service_ssh['sport']}}"
-      dport: "{{ service_ssh['dport']}}"
-      actions: "deny"
+  - _belongs_to: svc_block_v4_bogons
+    actions: deny
+    description: Deny all from 0.0.0.0/32
+    dest: any
+    dport: any
+    proto: any
+    source: 0.0.0.0/32
+    sport: any
+  - _belongs_to: svc_block_v4_bogons
+    actions: deny
+    description: Deny all from 127.0.0.0/8
+    dest: any
+    dport: any
+    proto: any
+    source: 127.0.0.0/8
+    sport: any
+  - _belongs_to: svc_block_v4_bogons
+    actions: deny
+    description: Deny all from 169.254.0.0/16
+    dest: any
+    dport: any
+    proto: any
+    source: '{{ net_rfc3927 }}'
+    sport: any
+  - _belongs_to: svc_block_v4_bogons
+    actions: deny
+    description: Deny all from RFC1918 addresses
+    dest: any
+    dport: any
+    proto: any
+    source: '{{ net_rfc1918 }}'
+    sport: any
+  - _belongs_to: svc_block_v4_bogons
+    actions: deny
+    description: Deny all from Multicast addresses
+    dest: any
+    dport: any
+    proto: any
+    source: '{{ net_rfc5771 }}'
+    sport: any
+  - _belongs_to: svc_block_v4_bogons
+    actions: deny
+    description: Deny all from RFC6890 addresses
+    dest: any
+    dport: any
+    proto: any
+    source: '{{ net_rfc6890 }}'
+    sport: any
 
-    - description: "Test different actions"
-      source: "{{ distbng['ipv4'] }}"
-      dest: "any"
-      proto: "any"
-      sport: "any"
-      dport: "any"
-      actions: "permit"
-
-    - description: "test protocol matching with multiple sources"
-      source: "any"
-      dest: "{{ distbng['ipv4'] }}"
-      proto: "icmp"
-      sport: "any"
-      dport: "any"
-      actions: "deny"
-
-    - description: "test port range matching"
-      source: "any"
-      dest: "{{ distbng['ipv4'] }}"
-      proto: "any"
-      sport: "any"
-      dport:
-          startrange: "1024"
-          endrange: "65535"
-      actions: "deny"
-
-    - description: "test hostgroups w/ multi source and multi dest"
-      source: "{{ distbng.ipv4 }}"          ## Testing dot notation
-      dest: "{{ cdns.hosts }}"              ## Testing dot notation
-      proto: "{{ service_dns['proto'] }}"
-      sport: "{{ service_dns['sport'] }}"
-      dport: "{{ service_dns['dport'] }}"
-      actions: "permit"
-
-    - description: "test variable port range"
-      source: "{{ distbng['ipv4'] }}"
-      dest: "any"
-      proto: "{{ service_testportrange['proto'] }}"
-      sport: "{{ service_testportrange['sport'] }}"
-      dport: "{{ service_testportrange['dport'] }}"
-      actions: "permit"
+...
