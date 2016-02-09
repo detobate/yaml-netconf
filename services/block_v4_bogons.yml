@@ -1,0 +1,13 @@
+---
+name: "svc_block_v4_bogons"
+acl_type: ipv4-acl
+description: "Block bad IPv4 sources"
+owner: "NetDev - IP Services"
+rules:
+    - "{{ rule_v4_deny_source_zeros }}"
+    - "{{ rule_v4_deny_source_loopbacks }}"
+    - "{{ rule_v4_deny_source_linklocals }}"
+    - "{{ rule_v4_deny_source_rfc1918 }}"
+    - "{{ rule_v4_deny_source_multicast }}"
+    - "{{ rule_v4_deny_source_rfc6890 }}"
+...
