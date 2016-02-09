@@ -1,0 +1,53 @@
+rule_v4_deny_source_zeros:
+    description: "Deny all from 0.0.0.0/32"
+    source: "0.0.0.0/32"
+    dest: "any"
+    proto: "any"
+    sport: "any"
+    dport: "any"
+    actions: "deny"
+
+rule_v4_deny_source_loopbacks:
+    description: "Deny all from 127.0.0.0/8"
+    source: "127.0.0.0/8"
+    dest: "any"
+    proto: "any"
+    sport: "any"
+    dport: "any"
+    actions: "deny"
+
+rule_v4_deny_source_linklocals:
+    description: "Deny all from 169.254.0.0/16"
+    source: "{{ net_rfc3927 }}"
+    dest: "any"
+    proto: "any"
+    sport: "any"
+    dport: "any"
+    actions: "deny"
+
+rule_v4_deny_source_rfc1918:
+    description: "Deny all from RFC1918 addresses"
+    source: "{{ net_rfc1918 }}"
+    dest: "any"
+    proto: "any"
+    sport: "any"
+    dport: "any"
+    actions: "deny"
+
+rule_v4_deny_source_multicast:
+    description: "Deny all from Multicast addresses"
+    source: "{{ net_rfc5771 }}"
+    dest: "any"
+    proto: "any"
+    sport: "any"
+    dport: "any"
+    actions: "deny"
+
+rule_v4_deny_source_rfc6890:
+    description: "Deny all from RFC6890 addresses"
+    source: "{{ net_rfc6890 }}"
+    dest: "any"
+    proto: "any"
+    sport: "any"
+    dport: "any"
+    actions: "deny"
