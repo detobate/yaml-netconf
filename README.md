@@ -13,7 +13,7 @@ Usage:
 
 Update definitions in:
 
-    ./objects/    - Any object*variables
+    ./objects/    - Any object variables
     ./rules/      - ACL rule definitions
     ./services/   - Service definitions containing the above rule definitions
     ./rulesets/   - A ruleset containing multiple services
@@ -35,3 +35,12 @@ Edit `example_playbook.yml` to reference the appropriate objects and ACL file.
 Run:
 
     ansible-playbook -i hosts example_playbook.yml
+
+
+
+Bonus Tools:
+------------
+
+- [/tools/SRtoYAML.py](https://github.com/detobate/yaml-netconf/blob/master/tools/SRtoYAML.py) - Feed it an SROS/TiMOS ACL configlet and some YAML object definitions it'll spit out YAML that we can consume
+
+- [/tools/yamilfy.py](https://github.com/detobate/yaml-netconf/blob/master/tools/yamlify.py) - Consumes [legacy object files](https://github.com/detobate/yaml-netconf/blob/master/tools/example_old_objects) and spits out YAML object definitions
