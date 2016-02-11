@@ -1,8 +1,0 @@
----
-cdns:
-  description: "Customer Recursive DNS"
-  hosts:
-    - "{{ cdns1_bllon['ip'] }}"
-    - "{{ cdns2_bllon['ip'] }}"
-
-...

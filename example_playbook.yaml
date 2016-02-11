@@ -1,0 +1,9 @@
+- name: Generate BNG ACL
+  hosts: BBPEs
+  connection: local
+  gather_facts: True
+  pre_tasks:
+    - include_vars: objects/generic.yaml
+    - include_vars: ACLs/example_ACL.yaml
+  roles:
+    - BNG
