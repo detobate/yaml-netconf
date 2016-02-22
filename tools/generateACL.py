@@ -4,11 +4,11 @@ import os
 import yaml
 import argparse
 
-parser = argparse.ArgumentParser(description='Take YAML ACL ruleset templates and generate a YAML ACL ruleset')
-parser.add_argument('-s', dest='service', metavar='<Services Path>', default="./services/", help='Path to YAML service definition files. Defaults to ./services/')
+parser = argparse.ArgumentParser(description='Take a YAML ACL template and generate a YAML ACL ruleset')
+parser.add_argument('-s', dest='service', metavar='<SACP Path>', default="./SACPs/", help='Path to YAML SACP definition files. Defaults to ./SACPs/')
 parser.add_argument('-r', dest='rules', metavar='<Rules Path>', default="./rules/", help='Path to YAML rule definition files. Defaults to ./rules/')
 #parser.add_argument('-o', metavar='./outpath/', help='YAML Object files')
-parser.add_argument('ruleset', metavar='<Ruleset_File>', help='Ruleset Definition')
+parser.add_argument('aclTemplate', metavar='<ACL_template>', help='ACL Template')
 args = parser.parse_args()
 
 def parseService(service, services, rules, yamlRuleset):
@@ -25,7 +25,7 @@ def parseService(service, services, rules, yamlRuleset):
 def main():
     # First, build a dict of the ruleset definition
     ruleset = {}
-    with open(args.ruleset, 'r') as infile:
+    with open(args.aclTemplate, 'r') as infile:
         for entry in yaml.safe_load_all(infile):
             ruleset.update(entry)
 
@@ -59,7 +59,7 @@ def main():
     for service in ruleset['services']:
         service = service.strip("{} ")
         if services[service]['acl_type'] != aclType:
-            print("Error: Service definition %s is not of type %s" % (services[service]['name'], aclType))
+            print("Error: SACP definition %s is not of type %s" % (services[service]['name'], aclType))
             exit(1)
         yamlRuleset = parseService(service, services, rules, yamlRuleset)
 
