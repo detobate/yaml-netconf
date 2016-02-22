@@ -1,0 +1,91 @@
+<config>
+    <configure xmlns="urn:alcatel-lucent.com:sros:ns:yang:conf-filter-r13">
+        <filter>
+            <ip-filter>
+                <filter-id>{{ ACL['id'] }}</filter-id>
+{% set count = [1] %}
+{% for rule in ACL['rules'] %}
+{% if rule['source'] is string %}
+    {%- set sources = [rule['source']] -%}
+{% else %}
+    {%- set sources = rule['source'] -%}
+{% endif %}
+{% for source in sources %}
+{% if rule['dest'] is string %}
+    {%- set destinations = [rule['dest']] -%}
+{% else %}
+    {%- set destinations = rule['dest'] -%}
+{% endif %}
+{% for dest in destinations %}
+                <entry>
+                    <entry-id>{{ count[0] }}</entry-id>
+{% if rule['description'] is defined %}
+                    <description>
+                        <description-string>
+                            {{ rule['description'] }}
+                        </description-string>
+                    </description>
+{% endif %}
+                    <match>
+{# PROTOCOL MATCHING BEGINS #}
+{% if rule['proto'] is not none and rule['proto'] != "any" %}
+                        <protocol>{{ rule['proto'] }}</protocol>
+{% endif %}
+{# DESTINATION ADDRESS MATCHING BEGINS #}
+{% if ACL['acl_type'] == "ipv4-acl" and dest != "any" %}
+                        <dst-ip>
+                            <ip-address-mask>{{ dest }}</ip-address-mask>
+                        </dst-ip>
+{% endif %}
+{# SOURCE ADDRESS MATCHING BEGINS #}
+{% if ACL['acl_type'] == "ipv4-acl" and source is not none and source != "any" %}
+                        <src-ip>
+                            <ip-address-mask>{{ source }}</ip-address-mask>
+                        </src-ip>
+{% endif %}
+{# SOURCE PORT MATCHING BEGINS #}
+{% if rule['sport']['startrange'] is defined and rule['sport']['endrange'] is defined %}
+                <src-port>
+                    <range>{{ rule['sport']['startrange'] }}</range>
+                    <range>{{ rule['sport']['endrange'] }}</range>
+                </src-port>
+{% endif %}
+{% if rule['sport'] != "any"  %}
+                <src-port>
+                    <lt-gt-eq>eq</lt-gt-eq>
+                    <src-port-number>{{ rule['sport'] }}</src-port-number>
+                </src-port>
+{% endif %}
+{# DESTINATION PORT MATCHING BEGINS #}
+{% if rule['dport']['startrange'] is defined and rule['dport']['endrange'] is defined %}
+                <dst-port>
+                    <range>{{ rule['dport']['startrange'] }}</range>
+                    <range>{{ rule['dport']['endrange'] }}</range>
+                </dst-port>
+{% endif %}
+{% if rule['dport'] != "any"  %}
+                <dst-port>
+                    <lt-gt-eq>eq</lt-gt-eq>
+                    <dst-port-number>{{ rule['dport'] }}</dst-port-number>
+                </dst-port>
+{% endif %}
+{# END OF MATCH CRITERION #}
+                    </match>
+{% endfor %}
+                    <action>
+{% if rule['actions'] == 'permit' %}
+                        <forward>
+                        </forward>
+{% elif rule['actions'] == 'deny' %}
+                        <drop>
+                        </drop>
+{% endif %}
+                    </action>
+                </entry>
+{% if count.append(count.pop() + 1) %}{% endif %}{# increment count by 1 #}
+{% endfor %}
+{% endfor %}
+            </ip-filter>
+        </filter>
+    </configure>
+</config>
