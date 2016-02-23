@@ -1,8 +1,21 @@
 <config>
     <configure xmlns="urn:alcatel-lucent.com:sros:ns:yang:conf-filter-r13">
         <filter>
+{% if ACL['acl_type'] == "ipv4-acl" %}
             <ip-filter>
-                <filter-id>{{ ACL['id'] }}</filter-id>
+{% elif ACL['acl_type'] == "ipv6-acl" %}
+            <ipv6-filter>
+{% endif %}
+                <filter-id>{{ ACL['acl_id'] }}</filter-id>
+{% if ACL['default_action'] == 'deny' %}
+                <default-action>
+                    <drop-forward>drop</drop-forward>
+                </default-action>
+{% elif ACL['default_action'] == 'permit' %}
+                <default-action>
+                    <drop-forward>forward</drop-forward>
+                </default-action>
+{% endif %}
 {% set count = [1] %}
 {% for rule in ACL['rules'] %}
 {% if rule['source'] is string %}
@@ -32,13 +45,13 @@
                         <protocol>{{ rule['proto'] }}</protocol>
 {% endif %}
 {# DESTINATION ADDRESS MATCHING BEGINS #}
-{% if ACL['acl_type'] == "ipv4-acl" and dest != "any" %}
+{% if dest != "any" %}
                         <dst-ip>
                             <ip-address-mask>{{ dest }}</ip-address-mask>
                         </dst-ip>
 {% endif %}
 {# SOURCE ADDRESS MATCHING BEGINS #}
-{% if ACL['acl_type'] == "ipv4-acl" and source is not none and source != "any" %}
+{% if source is not none and source != "any" %}
                         <src-ip>
                             <ip-address-mask>{{ source }}</ip-address-mask>
                         </src-ip>
@@ -69,12 +82,45 @@
                     <dst-port-number>{{ rule['dport'] }}</dst-port-number>
                 </dst-port>
 {% endif %}
-{# END OF MATCH CRITERION #}
+{# ICMP MATCHING BEGINS #}
+{% if rule['icmp_code'] is defined %}
+                <icmp-code>
+                    <icmp-code>{{ rule['icmp_code'] }}</icmp-code>
+                </icmp-code>
+{% endif %}
+{% if rule['icmp_type'] is defined %}
+                <icmp-type>
+                    <icmp-type>{{ rule['icmp_type'] }}</icmp-type>
+                </icmp-type>
+{% endif %}
+{# MISCELLANEOUS MATCHING BEGINS #}
+{% if rule['ip_option'] is defined %}
+                <ip-option>
+                    <ip-option-value>{{ rule['icmp_type'] }}</ip-option-value>
+                </ip-option>
+{% endif %}
+{% if rule['dscp'] is defined %}
+                <dscp>
+                    <dscp-name>{{ rule['dscp'] }}</dscp-name>
+                </dscp>
+{% endif %}
+{% if rule['fragment'] is defined %}
+                <fragment>
+                    <true-false>{{ rule['fragment'] }}</true-false>
+                </fragment>
+{% endif %}
+{# END OF MATCH CRITERIA #}
                     </match>
 {% endfor %}
+{# ACTION MATCHING #}
                     <action>
 {% if rule['actions'] == 'permit' %}
                         <forward>
+{% if rule['next_hop'] is defined %}
+                            <next-hop>
+                                <ip-address>{{ rule['next_hop'] }}</ip-address>
+                            </next-hop>
+{% endif %}
                         </forward>
 {% elif rule['actions'] == 'deny' %}
                         <drop>
@@ -85,7 +131,11 @@
 {% if count.append(count.pop() + 1) %}{% endif %}{# increment count by 1 #}
 {% endfor %}
 {% endfor %}
+{% if ACL['acl_type'] == "ipv4-acl" %}
             </ip-filter>
+{% elif ACL['acl_type'] == "ipv6-acl" %}
+            </ipv6-filter>
+{% endif %}
         </filter>
     </configure>
 </config>
