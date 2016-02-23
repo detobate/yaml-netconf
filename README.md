@@ -63,4 +63,4 @@ Bonus Tools:
 
 - [/tools/yamilfy.py](https://github.com/detobate/yaml-netconf/blob/master/tools/yamlify.py) - Consumes legacy World of ACL object files and spits out YAML object definitions for use above
 
-- [/tools/nc_push.py](https://github.com/detobate/yaml-netconf/blob/master/tools/nc_push.py) - A small script to push XML to a device via NETCONF
+- [/tools/netconf-tool.py](https://github.com/detobate/yaml-netconf/blob/master/tools/netconf-tool.py) - A small script to interact with a device via NETCONF
