@@ -1,0 +1,10 @@
+---
+name: "svc_deny_any"
+acl_type: ipv4-acl
+description: "Explicit Deny Any Any to be included at the end of a ruleset"
+owner: "NetDev - ISP Services"
+rules:
+    - rule: "{{ rule_deny_any }}"
+      weight: 0
+      tests:
+          - 1

@@ -4,10 +4,16 @@ acl_type: ipv4-acl
 description: "Block bad IPv4 sources"
 owner: "NetDev - IP Services"
 rules:
-    - "{{ rule_v4_deny_source_zeros }}"
-    - "{{ rule_v4_deny_source_loopbacks }}"
-    - "{{ rule_v4_deny_source_linklocals }}"
-    - "{{ rule_v4_deny_source_rfc1918 }}"
-    - "{{ rule_v4_deny_source_multicast }}"
-    - "{{ rule_v4_deny_source_rfc6890 }}"
+    - rule: "{{ rule_v4_deny_source_zeros }}"
+      weight: 100
+    - rule: "{{ rule_v4_deny_source_loopbacks }}"
+      weight: 100
+    - rule: "{{ rule_v4_deny_source_linklocals }}"
+      weight: 100
+    - rule: "{{ rule_v4_deny_source_rfc1918 }}"
+      weight: 100
+    - rule: "{{ rule_v4_deny_source_multicast }}"
+      weight: 100
+    - rule: "{{ rule_v4_deny_source_rfc6890 }}"
+      weight: 100
 ...
