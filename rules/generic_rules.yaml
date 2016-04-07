@@ -1,0 +1,54 @@
+rule_icmp_any:
+    description: "Permit ICMP any any"
+    source: "any"
+    dest: "any"
+    proto: "icmp"
+    sport: "any"
+    dport: "any"
+    actions: "permit"
+
+rule_ssh_any:
+    description: "Permit SSH any any"
+    source: "any"
+    dest: "any"
+    proto: "tcp"
+    sport: "any"
+    dport: "22"
+    actions: "permit"
+
+rule_any_from_distbngv4:
+    description: "Permit source DISTBNGv4 to any"
+    source: "{{ distbng.ipv4 }}"
+    dest: "any"
+    proto: "any"
+    sport: "any"
+    dport: "any"
+    actions: "permit"
+
+rule_v4_deny_source_192_168_2_0_24:
+    description: "Deny all from RFC1918 addresses"
+    source: "192.168.2.0/24"
+    dest: "any"
+    proto: "any"
+    sport: "any"
+    dport: "any"
+    actions: "deny"
+
+rule_block_udp_frag:
+    description: "Block fragmented UDP packets"
+    source: "any"
+    dest: "any"
+    proto: "udp"
+    sport: "any"
+    dport: "any"
+    fragment: "true"
+    actions: "deny"
+
+rule_deny_any:
+    description: "Deny any to any"
+    source: "any"
+    dest: "any"
+    proto: "any"
+    sport: "any"
+    dport: "any"
+    actions: "deny"
