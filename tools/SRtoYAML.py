@@ -13,7 +13,10 @@ else:
         print("Couldn't find %s" % infile)
         exit(1)
 
-objectFiles = (sys.argv[2:])
+try:
+    objectFiles = (sys.argv[2:])
+except:
+    objectFiles = False
 
 def fetchObjects(objectFiles):
     for file in objectFiles:
@@ -53,7 +56,7 @@ def parseRule(rule):
         elif isinstance(rule['dport'], list):
             newRule['dport'] = {}
             newRule['dport']['startrange'] = rule['dport'][0]
-            newRule['dport']['endrange'] =rule['dport'][1]
+            newRule['dport']['endrange'] = rule['dport'][1]
     except:
         newRule['dport'] = "any"
 
@@ -134,12 +137,14 @@ def main():
 
     yamlFile = {}
     yamlFile['acl_type'] = '"ipv4-acl" OR "ipv6-acl"'
+    yamlFile['acl_id'] = 'ACL ID#'
     yamlFile['description'] = '<FILL_ME>'
     yamlFile['owner'] = '<FILL_ME>'
     yamlFile['rules'] = []
 
     ruleset = fetchRules(infile)
-    objects = fetchObjects(objectFiles)
+    if objectFiles is not None:
+        objects = fetchObjects(objectFiles)
 
     for rule in ruleset:
         for key, value in rule.items():
