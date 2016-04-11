@@ -1,0 +1,9 @@
+object:
+- "{{ net_rfc1112 }}"
+- "{{ net_rfc1122 }}"
+- "{{ net_rfc2544 }}"
+- "{{ net_rfc3171 }}"
+- "{{ net_rfc3927 }}"
+- "{{ net_rfc5736 }}"
+- "{{ net_rfc5737 }}"
+- "{{ net_rfc6598 }}"
