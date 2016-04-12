@@ -1,0 +1,4 @@
+object:
+- "{{ net_rfc922 }}"
+- "{{ net_rfc3068 }}"
+- "{{ net_bogon_cymru }}"
