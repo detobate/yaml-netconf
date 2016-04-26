@@ -4,6 +4,6 @@
   gather_facts: True
   pre_tasks:
     - include_vars: objects/generic.yaml
-    - include_vars: ruleset/example_ACL.yaml
+    - include_vars: rulesets/example_ACL.yaml
   roles:
     - BNG
