@@ -7,36 +7,22 @@
             <ipv6-filter>
 {% endif %}
                 <filter-id>{{ ACL['acl_id'] }}</filter-id>
-{% if ACL['default_action'] == 'deny' %}
+{% if ACL['default'] == 'deny' %}
                 <default-action>
                     <drop-forward>drop</drop-forward>
                 </default-action>
-{% elif ACL['default_action'] == 'permit' %}
+{% elif ACL['default'] == 'permit' %}
                 <default-action>
                     <drop-forward>forward</drop-forward>
                 </default-action>
 {% endif %}
 {% set count = [1] %}
 {% for rule in ACL['rules'] %}
-{% if rule['source'] is string %}
-    {%- set sources = [rule['source']] -%}
-{% else %}
-    {%- set sources = rule['source'] -%}
-{% endif %}
-{% for source in sources %}
-{% if rule['dest'] is string %}
-    {%- set destinations = [rule['dest']] -%}
-{% else %}
-    {%- set destinations = rule['dest'] -%}
-{% endif %}
-{% for dest in destinations %}
                 <entry>
                     <entry-id>{{ count[0] }}</entry-id>
 {% if rule['description'] is defined %}
                     <description>
-                        <description-string>
-                            {{ rule['description'] }}
-                        </description-string>
+                        <description-string>{{ rule['description'] }}</description-string>
                     </description>
 {% endif %}
                     <match>
@@ -45,15 +31,21 @@
                         <protocol>{{ rule['proto'] }}</protocol>
 {% endif %}
 {# DESTINATION ADDRESS MATCHING BEGINS #}
-{% if dest != "any" %}
+{% if rule['dest'] is not none and rule['dest'] != "any" %}
                         <dst-ip>
-                            <ip-address-mask>{{ dest }}</ip-address-mask>
+                            <ip-address-mask>{{ rule['dest'] }}</ip-address-mask>
+                        </dst-ip>
+{% else %}
+                        <dst-ip>
                         </dst-ip>
 {% endif %}
 {# SOURCE ADDRESS MATCHING BEGINS #}
-{% if source is not none and source != "any" %}
+{% if rule['source'] is not none and rule['source'] != "any" %}
                         <src-ip>
-                            <ip-address-mask>{{ source }}</ip-address-mask>
+                            <ip-address-mask>{{ rule['source'] }}</ip-address-mask>
+                        </src-ip>
+{% else %}
+                        <src-ip>
                         </src-ip>
 {% endif %}
 {# SOURCE PORT MATCHING BEGINS #}
@@ -111,7 +103,6 @@
 {% endif %}
 {# END OF MATCH CRITERIA #}
                     </match>
-{% endfor %}
 {# ACTION MATCHING #}
                     <action>
 {% if rule['actions'] == 'permit' %}
@@ -129,7 +120,6 @@
                     </action>
                 </entry>
 {% if count.append(count.pop() + 1) %}{% endif %}{# increment count by 1 #}
-{% endfor %}
 {% endfor %}
 {% if ACL['acl_type'] == "ipv4-acl" %}
             </ip-filter>

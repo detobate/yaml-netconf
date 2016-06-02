@@ -3,18 +3,6 @@ default-action forward
 description "{{ ACL['description'] }}"
 {% set count = [1] %}
 {% for rule in ACL['rules'] %}
-{% if rule['source'] is string %}
-    {%- set sources = [rule['source']] -%}
-{% else %}
-    {%- set sources = rule['source'] -%}
-{% endif %}
-{% for source in sources %}
-{% if rule['dest'] is string %}
-    {%- set destinations = [rule['dest']] -%}
-{% else %}
-    {%- set destinations = rule['dest'] -%}
-{% endif %}
-{% for dest in destinations %}
 entry {{ count[0] }} create
 {% if count.append(count.pop() + 1) %}{% endif %} {# increment count by 1 #}
  description "{{ rule['description'] }}"
@@ -23,11 +11,11 @@ entry {{ count[0] }} create
 {% else %}
   match
 {% endif %}
-{% if source != "any" %}
-    src-ip {{ source }}
+{% if rule['source'] != "any" %}
+    src-ip {{ rule['source'] }}
 {% endif %}
-{% if dest != "any" %}
-    dst-ip {{ dest }}
+{% if rule['dest'] != "any" %}
+    dst-ip {{ rule['dest'] }}
 {% endif %}
 {% if rule['sport']['startrange'] is defined and rule['sport']['endrange'] is defined %}
     src-port range {{ rule['sport']['startrange'] }} {{ rule['sport']['endrange'] }}
@@ -46,6 +34,4 @@ entry {{ count[0] }} create
   action drop
 {% endif %}
 exit
-{% endfor %}
-{% endfor %}
 {% endfor %}

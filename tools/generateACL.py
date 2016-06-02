@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import sys
 import os
 import yaml
 import argparse
@@ -14,87 +13,104 @@ args = parser.parse_args()
 
 defaultWeight = 50
 
-def addLengths(yamlRuleset, objects):
-    ''' A horrible function to temporarily resolve variables
-        in order to determine how specific the source/destinations are '''
+def resolve_ruleset(yamlRuleset, objects):
+    ''' Iterate over the ruleset and resolve Jinja2 style variables
+    Replace the list of rules with the expanded ones '''
+
+    resolved_rules = []
 
     for rule in yamlRuleset['ACL']['rules']:
         if rule['source'][0] == "{" and rule['source'][-1] == "}":
-            svalue = lookupVar(objects, rule['source'])
-            # Do we need to iterate over this variable?
-            if isinstance(svalue, list):
-                slen = 0
-                for source in svalue:
-                    if source[0] == "{" and source[-1] == "}":
-                        try:
-                            svalue = ipaddress.ip_network(lookupVar(objects, source[0]), strict=False)
-                        except:
-                            # not found, break out of loop
-                            continue
-                    else:
-                        svalue = ipaddress.ip_network(source)
-                if svalue.prefixlen > slen:
-                    slen = svalue.prefixlen
-                rule['_slen'] = slen
-            else:
-                try:
-                    svalue = ipaddress.ip_network(svalue, strict=False)
-                    rule['_slen'] = svalue.prefixlen
-                except:
-                    print("%s isn't an IP or prefix" % svalue)
-        # Treat "any" as zero length
-        elif rule['source'] == "any":
-            rule['_slen'] = 0
-
-        # If not a variable or "any", assume it's an IP/prefix
+            source = load_object(objects, rule['source'])
         else:
-            try:
-                svalue = ipaddress.ip_network(rule['source'], strict=False)
-                rule['_slen'] = svalue.prefixlen
-            except:
-                print("%s isn't an IP or prefix" % svalue)
-
+            source = [rule['source']]
         if rule['dest'][0] == "{" and rule['dest'][-1] == "}":
-            dvalue = lookupVar(objects, rule['dest'])
-            try:
-                dvalue = ipaddress.ip_network(dvalue, strict=False)
-                rule['_dlen'] = dvalue.prefixlen
-            except:
-                print("%s isn't an IP or prefix" % dvalue)
-        elif rule['dest'] == "any":
-            rule['_dlen'] = 0
+            dest = load_object(objects, rule['dest'])
         else:
-            try:
-                dvalue = ipaddress.ip_network(rule['dest'], strict=False)
-                rule['_dlen'] = svalue.prefixlen
-            except:
-                print("%s isn't an IP or prefix" % dvalue)
+            dest = [rule['dest']]
+        if rule['sport'][0] == "{" and rule['sport'][-1] == "}":
+            sport = load_object(objects, rule['sport'])
+        else:
+            sport = [rule['sport']]
+        if rule['dport'][0] == "{" and rule['dport'][-1] == "}":
+            dport = load_object(objects, rule['dport'])
+        else:
+            dport = [rule['dport']]
+        if rule['proto'][0] == "{" and rule['proto'][-1] == "}":
+            proto = load_object(objects, rule['proto'])
+        else:
+            proto = [rule['proto']]
 
+        # LOLOLOLOLOOLOLOL
+        for src in source:
+            for dst in dest:
+                for sp in sport:
+                    for dp in dport:
+                        for p in proto:
+                            new_rule = { 'source': src, 'dest': dst, 'sport': sp, 'dport': dp, 'proto': p, 'description': rule['description'],\
+                                         '_belongs_to': rule['_belongs_to'], 'actions': rule['actions'], '_weight': rule['_weight'] }
+                            resolved_rules.append(new_rule)
+
+    yamlRuleset['ACL']['rules'] = resolved_rules
     return yamlRuleset
 
-def lookupVar(objects, var):
 
-    var = var.strip("{} ")
-    # First try to match variable exactly
-    try:
-        value = objects[var]
-    except:
-        # Failing that, try to match one layer deeper
+
+def load_object(objects, object_name):
+    ''' list_of_objects can either be another reference, then this function will call itself again, if not
+         then we return the actual list'''
+
+    key = object_name.strip('{} ')
+    resolved_objects = []
+
+    # Make sure results are always lists, so we can iterate over them
+    if type(objects[key]) == str:
+        new_objects = [objects[key]]       # Direct single match
+    elif type(objects[key]) == list:
+        new_objects = objects[key]         # Match contains multiple values
+
+    # Recursively lookup objects until they're no longer {{ variables }}
+    for obj in new_objects:
+        if obj[0:2] == '{{':
+            temp_object = load_object(objects, obj)
+            if type(temp_object) == str:
+                resolved_objects.append(temp_object)
+            elif type(temp_object) == list:
+                resolved_objects = resolved_objects + temp_object
+        else:
+            # No more variables, add the match to the list we'll return
+            resolved_objects.append(obj)
+
+    return resolved_objects
+
+def find_length(obj):
+    ''' Simple function to return length of prefix or 0 if "any" '''
+    if obj.lower() == "any":
+        length = 0
+    else:
         try:
-            var1, var2 = var.split(".")
-            value = objects[var1][var2]
+            length = ipaddress.ip_network(obj).prefixlen
         except:
-            pass
+            length = 0
 
-    return value
+    return(length)
 
-def parseService(service, services, rules, yamlRuleset):
+def sort_ruleset(yamlRuleset):
+    ''' Sort the compiled ruleset.
+    Weight should override prefix lengths.
+    Then sort by source length followed by dest length'''
+    yamlRuleset['ACL']['rules'].sort(key=lambda rule: (rule['_weight'], find_length(rule['source']), find_length(rule['dest'])), reverse=True)
+
+    return(yamlRuleset)
+
+def parse_service(service, services, rules, yamlRuleset):
     ''' This function parses a SACP definition
         expands individual rules but leaves variables unresolved'''
+
     tests = []
     for rule in services[service]['rules']:
         tempRule = {}
-        newRule = True
+
         # Check if a rule is weighted, else set weight to 50
         try:
             tempRule['_weight'] = rule['weight']
@@ -132,6 +148,7 @@ def main():
     yamlRuleset['ACL']['acl_type'] = aclType
     yamlRuleset['ACL']['description'] = ruleset['description']
     yamlRuleset['ACL']['name'] = ruleset['name']
+    yamlRuleset['ACL']['default'] = ruleset['default']
     yamlRuleset['ACL']['rules'] = []
 
     # Build a dict of all the rules we know about
@@ -163,13 +180,12 @@ def main():
         if services[service]['acl_type'] != aclType:
             print("Error: SACP definition %s is not of type %s" % (services[service]['name'], aclType))
             exit(1)
-        yamlRuleset = parseService(service, services, rules, yamlRuleset)
+        yamlRuleset = parse_service(service, services, rules, yamlRuleset)
 
-    # Sort ruleset by IP/prefix size
-    yamlRuleset = addLengths(yamlRuleset, objects)
-
-    # Sort the compiled rules list first by dest prefix, then source, finally weight.
-    yamlRuleset['ACL']['rules'].sort(key=lambda x: (x['_dlen'], x['_slen'], x['_weight']), reverse=True)
+    # Resolve ruleset
+    yamlRuleset = resolve_ruleset(yamlRuleset, objects)
+    # Sort ruleset
+    yamlRuleset = sort_ruleset(yamlRuleset)
 
     print(yaml.dump(yamlRuleset, explicit_start=True, default_flow_style=False))
     print('...')

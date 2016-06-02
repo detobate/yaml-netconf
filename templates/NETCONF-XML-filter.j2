@@ -6,47 +6,35 @@
         <access-list-entries>
 {% set count = [1] %}
 {% for rule in ACL['rules'] %}
-{% if rule['source'] is string %}
-    {%- set sources = [rule['source']] -%}
-{% else %}
-    {%- set sources = rule['source'] -%}
-{% endif %}
-{% for source in sources %}
-{% if rule['dest'] is string %}
-    {%- set destinations = [rule['dest']] -%}
-{% else %}
-    {%- set destinations = rule['dest'] -%}
-{% endif %}
-{% for dest in destinations %}
           <ace>
             <matches>
 {# DESTINATION ADDRESS MATCHING BEGINS #}
-{% if ACL['acl_type'] == "ipv4-acl" and dest != "any" %}
+{% if ACL['acl_type'] == "ipv4-acl" and rule['dest'] is not none and rule['dest'] != "any" %}
               <destination-ipv4-network>
-                  {{ dest }}
+                  {{ rule['dest'] }}
               </destination-ipv4-network>
               <destination-ipv6-network />
-{% elif ACL['acl_type'] == "ipv6-acl" and dest != "any" %}
+{% elif ACL['acl_type'] == "ipv6-acl" and rule['dest'] is not none and rule['dest'] != "any" %}
               <destination-ipv4-network />
               <destination-ipv6-network>
-                {{ dest }}
+                {{ rule['dest'] }}
               </destination-ipv6-network>
-{% elif source is none or dest == "any" %}
+{% elif rule['dest'] is none or rule['dest'] == "any" %}
               <destination-ipv4-network />
               <destination-ipv6-network />
 {% endif %}
 {# SOURCE ADDRESS MATCHING BEGINS #}
-{% if ACL['acl_type'] == "ipv4-acl" and source is not none and source != "any" %}
+{% if ACL['acl_type'] == "ipv4-acl" and rule['source'] is not none and rule['source'] != "any" %}
               <source-ipv4-network>
-                  {{ source }}
+                  {{ rule['source'] }}
               </source-ipv4-network>
               <source-ipv6-network />
-{% elif ACL['acl_type'] == "ipv6-acl" and source is not none and source != "any" %}
+{% elif ACL['acl_type'] == "ipv6-acl" and rule['source'] is not none and rule['source'] != "any" %}
               <source-ipv4-network />
               <source-ipv6-network>
-                {{ source }}
+                {{ rule['source'] }}
               </source-ipv6-network>
-{% elif source is none or source == "any" %}
+{% elif rule['source'] is none or rule['source'] == "any" %}
               <source-ipv4-network />
               <source-ipv6-network />
 {% endif %}
@@ -100,13 +88,14 @@
 {% endif %}
               </destination-port-range>
 {# ETHERNET / LAYER2 MATCHING BEGINS #}
+{# TODO: Put in L2 matching stuff ----
 {% if ACL['acl_type'] != "eth-acl" %}
               <destination-mac-address />
               <destination-mac-address-mask />
               <source-mac-address />
               <source-mac-address-mask />
               <input-interface />
-{% endif %}
+{% endif %} ---- #}
             </matches>
             <actions>
               <{{ rule['actions'] }} />
@@ -117,8 +106,6 @@
             <rule-name>rule{{ count[0] }}</rule-name>
           </ace>
 {% if count.append(count.pop() + 1) %}{% endif %} {# increment count by 1 #}
-{% endfor %}
-{% endfor %}
 {% endfor %}
         </access-list-entries>
         <acl-name></acl-name>
