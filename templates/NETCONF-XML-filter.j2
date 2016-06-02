@@ -10,30 +10,22 @@
             <matches>
 {# DESTINATION ADDRESS MATCHING BEGINS #}
 {% if ACL['acl_type'] == "ipv4-acl" and rule['dest'] is not none and rule['dest'] != "any" %}
-              <destination-ipv4-network>
-                  {{ rule['dest'] }}
-              </destination-ipv4-network>
+              <destination-ipv4-network>{{ rule['dest'] }}</destination-ipv4-network>
               <destination-ipv6-network />
 {% elif ACL['acl_type'] == "ipv6-acl" and rule['dest'] is not none and rule['dest'] != "any" %}
               <destination-ipv4-network />
-              <destination-ipv6-network>
-                {{ rule['dest'] }}
-              </destination-ipv6-network>
+              <destination-ipv6-network>{{ rule['dest'] }}</destination-ipv6-network>
 {% elif rule['dest'] is none or rule['dest'] == "any" %}
               <destination-ipv4-network />
               <destination-ipv6-network />
 {% endif %}
 {# SOURCE ADDRESS MATCHING BEGINS #}
 {% if ACL['acl_type'] == "ipv4-acl" and rule['source'] is not none and rule['source'] != "any" %}
-              <source-ipv4-network>
-                  {{ rule['source'] }}
-              </source-ipv4-network>
+              <source-ipv4-network>{{ rule['source'] }}</source-ipv4-network>
               <source-ipv6-network />
 {% elif ACL['acl_type'] == "ipv6-acl" and rule['source'] is not none and rule['source'] != "any" %}
               <source-ipv4-network />
-              <source-ipv6-network>
-                {{ rule['source'] }}
-              </source-ipv6-network>
+              <source-ipv6-network>{{ rule['source'] }}</source-ipv6-network>
 {% elif rule['source'] is none or rule['source'] == "any" %}
               <source-ipv4-network />
               <source-ipv6-network />
@@ -41,49 +33,35 @@
               <flow-label />
               <dscp />
 {% if rule['proto'] is not none and rule['proto'] != "any" %}
-              <protocol>
-                {{ rule['proto'] }}
-              </protocol>
+              <protocol>{{ rule['proto'] }}</protocol>
 {% else %}
               <protocol />
 {% endif %}
 {# SOURCE PORT MATCHING BEGINS #}
               <source-port-range>
 {% if rule['sport']['startrange'] is defined and rule['sport']['endrange'] is defined %}
-                <lower-port>
-                  {{ rule['sport']['startrange'] }}
-                </lower-port>
-                <upper-port>
-                  {{ rule['sport']['endrange'] }}
-                </upper-port>
+                <lower-port>{{ rule['sport']['startrange'] }}</lower-port>
+                <upper-port>{{ rule['sport']['endrange'] }}</upper-port>
 {% endif %}
 {% if rule['sport'] == "any"  %}
                 <lower-port />
                 <upper-port />
 {% else %}
-                <lower-port>
-                  {{ rule['sport'] }}
-                </lower-port>
+                <lower-port>{{ rule['sport'] }}</lower-port>
                 <upper-port />
 {% endif %}
               </source-port-range>
 {# DESTINATION PORT MATCHING BEGINS #}
               <destination-port-range>
 {% if rule['dport']['startrange'] is defined and rule['dport']['endrange'] is defined %}
-                <lower-port>
-                  {{ rule['dport']['startrange'] }}
-                </lower-port>
-                <upper-port>
-                  {{ rule['dport']['endrange'] }}
-                </upper-port>
+                <lower-port>{{ rule['dport']['startrange'] }}</lower-port>
+                <upper-port>{{ rule['dport']['endrange'] }}</upper-port>
 {% endif %}
 {% if rule['dport'] == "any"  %}
                 <lower-port />
                 <upper-port />
 {% else %}
-                <lower-port>
-                  {{ rule['dport'] }}
-                </lower-port>
+                <lower-port>{{ rule['dport'] }}</lower-port>
                 <upper-port />
 {% endif %}
               </destination-port-range>
@@ -97,9 +75,7 @@
               <input-interface />
 {% endif %} ---- #}
             </matches>
-            <actions>
-              <{{ rule['actions'] }} />
-            </actions>
+            <actions><{{ rule['actions'] }} /></actions>
             <ace-oper-data>
               <match-counter />
             </ace-oper-data>
