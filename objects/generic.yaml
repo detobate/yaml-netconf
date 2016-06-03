@@ -41,4 +41,69 @@ net_rfc5735:
   - "{{ net_bogon_cymru }}"
 net_broadcast_0: "0.0.0.0/32"
 net_broadcast_255: "255.255.255.255/32"
+port_isakmp: "500"
+port_nat_t: "4500"
+port_cisco_ipsla_alarm_ipsec:
+  - "{{ port_isakmp }}"
+  - "{{ port_nat_t }}"
+port_sip:
+  startrange: "5060"
+  endrange: "5061"
+port_rtp:
+  startrange: "1023"
+  endrange: "65535"
+port_l2tp: "1701"
+port_pcp:
+  startrange: "5350"
+  endrange: "5351"
+port_bgp: "179"
+port_ldp: "646"
+port_bfd1: "3784"
+port_bfd2: "3785"
+port_bfd:
+  - "{{ port_bfd1 }}"
+  - "{{ port_bfd2 }}"
+port_privileged:
+  startrange: "1"
+  endrange: "1024"
+port_unprivileged:
+  startrange: "1023"
+  endrange: "65535"
+port_ephemeral:
+  startrange: "49151"
+  endrange: "65535"
+port_hsrp: "1985"
+port_vnc:
+  startrange: "5900"
+  endrange: "5999"
+port_netappsync:
+  startrange: "10565"
+  endrange: "10569"
+port_tacacs: "49"
+port_radius_old:
+  startrange: "1645"
+  endrange: "1646"
+port_radius_old_auth: "1645"
+port_radius_old_acct: "1646"
+port_radius_new:
+  startrange: "1812"
+  endrange: "1813"
+port_radius_new_auth: "1812"
+port_radius_new_acct: "1813"
+port_radius:
+  - "{{ port_radius_old }}"
+  - "{{ port_radius_new }}"
+port_radius_rtr:
+  startrange: "1812"
+  endrange: "1816"
+port_radius_auth:
+  - "{{ port_radius_old_auth }}"
+  - "{{ port_radius_new_auth }}"
+port_radius_acct:
+  - "{{ port_radius_old_acct }}"
+  - "{{ port_radius_new_acct }}"
+port_ntp_mysql:
+  - "{{ port_ntp }}"
+  - "{{ port_mysql }}"
 ...
+
