@@ -19,36 +19,26 @@ def resolve_ruleset(yamlRuleset, objects):
 
     resolved_rules = []
 
+    # Resolve vars and turn the things we want to iterate over into lists
     for rule in yamlRuleset['ACL']['rules']:
-        if rule['source'][0] == "{" and rule['source'][-1] == "}":
-            source = load_object(objects, rule['source'])
-        else:
-            source = [rule['source']]
-        if rule['dest'][0] == "{" and rule['dest'][-1] == "}":
-            dest = load_object(objects, rule['dest'])
-        else:
-            dest = [rule['dest']]
-        if rule['sport'][0] == "{" and rule['sport'][-1] == "}":
-            sport = load_object(objects, rule['sport'])
-        else:
-            sport = [rule['sport']]
-        if rule['dport'][0] == "{" and rule['dport'][-1] == "}":
-            dport = load_object(objects, rule['dport'])
-        else:
-            dport = [rule['dport']]
-        if rule['proto'][0] == "{" and rule['proto'][-1] == "}":
-            proto = load_object(objects, rule['proto'])
-        else:
-            proto = [rule['proto']]
+        for item in ('source', 'dest', 'sport', 'dport', 'proto'):
+            if str(rule[item])[0:2] == "{{" and str(rule[item])[-2:] == "}}":
+                rule[item] = load_object(objects, rule[item])
+            else:
+                rule[item] = [rule[item]]
 
         # LOLOLOLOLOOLOLOL
-        for src in source:
-            for dst in dest:
-                for sp in sport:
-                    for dp in dport:
-                        for p in proto:
+        for src in rule['source']:
+            for dst in rule['dest']:
+                for sp in rule['sport']:
+                    for dp in rule['dport']:
+                        for p in rule['proto']:
                             new_rule = { 'source': src, 'dest': dst, 'sport': sp, 'dport': dp, 'proto': p, 'description': rule['description'],\
                                          '_belongs_to': rule['_belongs_to'], 'actions': rule['actions'], '_weight': rule['_weight'] }
+
+                            # Catch special items
+                            if "icmp-type" in rule:
+                                new_rule['icmp-type'] = rule['icmp-type']
                             resolved_rules.append(new_rule)
 
     yamlRuleset['ACL']['rules'] = resolved_rules
