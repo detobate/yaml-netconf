@@ -1,0 +1,47 @@
+acl {{ ACL['acl_id'] }}
+{% for rule in ACL['rules'] %}
+rule {{ rule['actions'] -}}
+{% if rule['proto'] != "any" %}
+ {{ rule['proto'] -}}
+{% else %}
+ ip {#- Probably incorrectly assume that "any" means "ip" #}
+{%- endif %}
+{% if rule['proto'] == "icmp" and rule['icmp-type'] is defined %}
+ icmp-type {{ rule['icmp-type'] }}
+{%- endif %}
+{% if rule['source'] != "any" %}
+{% set source = rule['source'].split('/') %}
+ source {{ source[0] -}}{% if source[1] is defined %} {{ source[1] -}} {% else %} 32{% endif %}
+{%- endif %}
+{% if rule['proto'] == "tcp" or rule['proto'] == "udp" %} {#- Ports are only valid if protocol is tcp/udp #}
+{% if rule['sport']['startrange'] is defined and rule['sport']['endrange'] is defined %}
+ source-port range {{ rule['dport']['startrange'] }} {{ rule['sport']['endrange'] }}
+{% elif rule['sport'] is defined and rule['sport'] != "any"%}
+ source-port eq {{ rule['sport'] }}
+{%- endif %}
+{% endif %}
+{% if rule['dest'] != "any" %}
+{% set dest = rule['dest'].split('/') %}
+ destination {{ dest[0] -}}{% if dest[1] is defined %} {{ dest[1] -}} {% else %} 32{% endif %}
+{%- endif %}
+{% if rule['proto'] == "tcp" or rule['proto'] == "udp" %} {#- Ports are only valid if protocol is tcp/udp #}
+{% if rule['dport']['startrange'] is defined and rule['dport']['endrange'] is defined %}
+ destination-port range {{ rule['dport']['startrange'] }} {{ rule['dport']['endrange'] }}
+{% elif rule['dport'] is defined and rule['dport'] != "any"%}
+ destination-port eq {{ rule['dport'] }}
+{%- endif %}
+{% endif %}
+{% if rule['vxlan'] is defined %}
+ vxlan vni {{ rule['vxlan'] -}}
+{%- endif %}
+{% if rule['dscp'] is defined and rule['tos'] is not defined and rule['precedence'] is not defined %}
+ dscp {{ rule['dscp'] -}}
+{%- endif %}
+{% if rule['tos'] is defined and rule['dscp'] is not defined %}
+ tos {{ rule['tos'] -}}
+{%- endif %}
+{% if rule['precedence'] is defined and rule['dscp'] is not defined %}
+ precedence {{ rule['precedence'] -}}
+{%- endif %}
+
+{% endfor %}
