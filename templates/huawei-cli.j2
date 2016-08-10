@@ -1,8 +1,8 @@
 acl {{ ACL['acl_id'] }}
+{% set count = 1 %}
 {% for rule in ACL['rules'] %}
-rule {{ rule['actions'] -}}
-{% if rule['proto'] != "any" %}
- {{ rule['proto'] -}}
+rule {{ count }} {{ rule['actions'] -}}
+{% if rule['proto'] != "any" %} {{ rule['proto'] -}}
 {% else %}
  ip {#- Probably incorrectly assume that "any" means "ip" #}
 {%- endif %}
@@ -43,5 +43,6 @@ rule {{ rule['actions'] -}}
 {% if rule['precedence'] is defined and rule['dscp'] is not defined %}
  precedence {{ rule['precedence'] -}}
 {%- endif %}
+{% set count = count + 1 %}{# increment count by 1 #}
 
 {% endfor %}
