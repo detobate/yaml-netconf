@@ -27,32 +27,17 @@ Definitions:
 Usage:
 ------
 
-**Step 1:**
 
-Update definition files in:
+* Git clone this repository
+* Create/modify objects/SACPs/rules as required.  Try to use existing objects where possible.
+* Create/modify the top-level ACL Template to reference the required SACPs/
+* Use the [generateACL.py](https://github.com/detobate/yaml-netconf/blob/master/tools/generateACL.py) tool to compile the ACL template and objects.
 
-    ./objects/          - Any object variables
-    ./rules/            - ACL rule definitions
-    ./services/         - Service definitions containing the above rule definitions
-    ./ACL_templates/    - An ACL template containing multiple services
+    `./tools/generateACL.py ACL_templates/example.yaml > rulesets/example_ruleset.yaml`
 
-*Note:* Any new object files added need to be included in the playbook.yml
+* Use [renderj2.py](https://github.com/detobate/yaml-netconf/blob/master/tools/renderj2.py) to generate configuration files by passing it the appropriate Jinja2 template and YAML ruleset:
 
-
-**Step 2:**
-
-Generate an ACL.yaml template file with:
-
-    ./tools/generateRuleset.py <ruleset>
-
-
-**Step 3:**
-
-Edit `example_playbook.yaml` to reference the appropriate objects and ACL file.
-
-Run:
-
-    ansible-playbook -i hosts example_playbook.yaml
+    `./tools/renderj2.py -j templates/huawei-cli.j2 -y rulesets/example_ruleset.yaml`
 
 
 
